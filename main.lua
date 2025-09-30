@@ -1,8 +1,3 @@
--- main.lua — entry point for your extension
-
--- Optionally print the Lua C module search path to debug
-print("package.cpath (before) = " .. package.cpath)
-
 local function readExtensionName()
   local defaultName = "binary-test"
   local possibleFiles = {"package.json"}
@@ -50,44 +45,35 @@ for _, entry in ipairs(newEntries) do
 end
 package.cpath = updatedCpath
 
-print("package.cpath (after) = " .. package.cpath)
-
 local moduleName = "testmodule"
-local requireOk, requireResult = pcall(require, moduleName)
 local mod = nil
 
-if requireOk then
-  mod = requireResult
-  print("Loaded testmodule via require()")
-else
-  print("require('" .. moduleName .. "') failed:", requireResult)
+local candidatePaths = {
+extensionRoot .. "/" .. moduleName .. ".so",
+extensionRoot .. "/lib/" .. moduleName .. ".so",
+extensionRoot .. "/bin/" .. moduleName .. ".so",
+"/usr/local/lib/lua/5.4/" .. extensionName .. "/" .. moduleName .. ".so",
+"/usr/local/lib/lua/5.4/" .. moduleName .. ".so"
+}
 
-  local candidatePaths = {
-    extensionRoot .. "/" .. moduleName .. ".so",
-    extensionRoot .. "/lib/" .. moduleName .. ".so",
-    extensionRoot .. "/bin/" .. moduleName .. ".so",
-    "/usr/local/lib/lua/5.4/" .. extensionName .. "/" .. moduleName .. ".so",
-    "/usr/local/lib/lua/5.4/" .. moduleName .. ".so"
-  }
-
-  local loaderName = "luaopen_" .. moduleName
-  for _, path in ipairs(candidatePaths) do
+local loaderName = "luaopen_" .. moduleName
+for _, path in ipairs(candidatePaths) do
     local loader, loadErr = package.loadlib(path, loaderName)
     if loader then
-      local ok, result = pcall(loader)
-      if ok then
+        local ok, result = pcall(loader)
+        if ok then
         mod = result
         package.loaded[moduleName] = mod
         print("Loaded testmodule via package.loadlib from " .. path)
         break
-      else
+        else
         print("Error invoking loader from " .. path .. ":", result)
-      end
+        end
     elseif loadErr then
-      print("package.loadlib failed on " .. path .. ":", loadErr)
+        print("package.loadlib failed on " .. path .. ":", loadErr)
     end
-  end
 end
+
 
 if mod then
   if mod.hello then

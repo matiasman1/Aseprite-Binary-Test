@@ -1,6 +1,6 @@
 # Aseprite Lua C++ Module Test
 
-This is a simple C++ module that can be compiled as a shared library and loaded into Aseprite's Lua scripting environment.
+This is a simple C++ module that can be compiled as a shared library on linux and loaded into Aseprite's Lua scripting environment.
 
 ## What it does
 
