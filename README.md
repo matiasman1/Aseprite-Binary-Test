@@ -1,43 +1,27 @@
-# Aseprite Lua C++ Module Test
+# ✨ Linux Aseprite Binary Demo
 
-This is a simple C++ module that can be compiled as a shared library on linux and loaded into Aseprite's Lua scripting environment.
+This extension showcases a native `.so` module running inside Aseprite **on Linux**—perfect for validating that Lua 5.4 can load linked libraries directly from an extension.
 
-## What it does
+---
 
-The module exports two functions:
+## 📦 Requirements
 
-- `hello()` &rarr; returns the string `"Hello from C++ side!"`
-- `test()` &rarr; returns `true`, allowing you to confirm that the binary module was loaded correctly
+Install the Lua toolchain and headers that match Aseprite’s runtime:
 
-## Prerequisites
-
-- C++ compiler (g++ or clang++)
-- Lua development headers
-- Aseprite with Lua scripting support
-
-## Installation
-
-### Ubuntu/Debian
 ```bash
-sudo apt-get install lua5.4-dev build-essential pkg-config
+# Debian/Ubuntu
+sudo apt-get update
+sudo apt-get install build-essential pkg-config liblua5.4-dev lua5.4
+
+# Fedora
+sudo dnf install @development-tools lua lua-devel
 ```
 
-If `lua5.4-dev` is not available for your distribution, install the closest Lua 5.4 development package and adjust the `pkg-config` invocations accordingly.
-### Fedora/CentOS
-```bash
-sudo dnf install lua-devel gcc-c++ pkgconf-pkg-config
-```
+---
 
-### macOS
-```bash
-brew install lua
-```
+## 🛠️ Compile the module
 
-## Compilation
-
-### Build the shared library (Lua 5.4 on Linux)
-
-This repository targets Lua 5.4 (the version bundled with modern Aseprite builds). Compile the module into a shared object using `pkg-config`:
+Compile the `testmodule.so` shared library against Lua 5.4:
 
 ```bash
 g++ -shared -fPIC \
@@ -46,44 +30,41 @@ g++ -shared -fPIC \
   $(pkg-config --libs lua5.4)
 ```
 
-If `pkg-config --cflags lua5.4` fails, install the `lua5.4-dev` package (Debian/Ubuntu) or adjust the include/library paths to match your system. You can discover header locations with:
+---
+
+## 🛠️ Package the extension
+
+After compilation, execute the included aseprite-extension packaging script
 
 ```bash
-find /usr -name "lua.h" 2>/dev/null
+sudo chmod +x create_extension.sh
+./create_extension.sh
 ```
 
-### Windows (MinGW)
-```bash
-g++ -shared -o testmodule.dll testprogram.cpp -llua
-```
+## ✅ Lua 5.4 sanity check
 
-## Installation target (Linux)
-
-Copy the compiled module to the Lua package directory that Aseprite searches on Linux:
+Confirm the binary loads before launching Aseprite:
 
 ```bash
-sudo mkdir -p /usr/local/lib/lua/5.4/binary-test
-sudo cp testmodule.so /usr/local/lib/lua/5.4/binary-test/
+lua5.4 -e 'package.cpath="./?.so;"..package.cpath; local mod=require("testmodule"); print(mod.hello())'
 ```
 
-The compiled library must be named `testmodule.so`. This extension prepends its installation folder to `package.cpath`, so the module is resolved directly from the extension directory.
+You should see:
 
-## Usage in Aseprite
-
-The included `main.lua` file demonstrates how to load and exercise the native module from Aseprite's Lua runtime:
-
-```lua
-local ok, mod = pcall(require, "testmodule")
-if not ok then
-  print("Failed to load C++ module:", mod)
-  return
-end
-
-print(mod.hello())        -- prints: Hello from C++ side!
-print(mod.test())         -- prints: true
+```
+Hello from C++ side!
 ```
 
-When you run the extension inside Aseprite, you should see both outputs in the console, confirming that the shared library was located and the functions were exported correctly.
+---
+
+## 🖼️ Run inside Aseprite
+
+1. Install the packaged extension (`Binary-test.aseprite-extension`).
+2. Launch Aseprite and enable the extension.
+3. Open the console (`Ctrl+Shift+`).
+4. Run the script: it prints the greeting plus a `true` value, proving the `.so` was linked and executed inside Aseprite on Linux.
+
+Enjoy your binary-powered Aseprite workflow! 🎉
 
 ## File Structure
 

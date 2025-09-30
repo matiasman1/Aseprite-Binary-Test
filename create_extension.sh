@@ -37,16 +37,6 @@ fi
 echo "Creating $EXTENSION_NAME.zip..."
 zip -r "$EXTENSION_NAME.zip" *.lua *.json bin lib *.so *.dll *.dylib
 
-# Ensure the Lua module is installed to the Aseprite search path (requires root)
-TARGET_DIR="/usr/local/lib/lua/5.4/binary-test"
-if [ -d "$TARGET_DIR" ] && [ -w "$TARGET_DIR" ]; then
-    cp testmodule.so "$TARGET_DIR/"
-else
-    echo "Copying testmodule.so to $TARGET_DIR (may prompt for sudo password)"
-    sudo mkdir -p "$TARGET_DIR"
-    sudo cp testmodule.so "$TARGET_DIR/"
-fi
-
 # Rename the .zip file to .aseprite-extension
 echo "Renaming $EXTENSION_NAME.zip to $EXTENSION_NAME.aseprite-extension..."
 mv "$EXTENSION_NAME.zip" "$EXTENSION_NAME.aseprite-extension"
