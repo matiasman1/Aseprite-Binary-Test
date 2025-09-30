@@ -32,6 +32,37 @@ end
 local extensionName = readExtensionName()
 local homeDir = os.getenv("HOME") or "~"
 local extensionRoot = homeDir .. "/.config/aseprite/extensions/" .. extensionName
+local moduleName = "testmodule"
+local mod = nil
+
+  local candidatePaths = {
+    extensionRoot .. "/" .. moduleName .. ".so",
+    extensionRoot .. "/lib/" .. moduleName .. ".so",
+    extensionRoot .. "/bin/" .. moduleName .. ".so",
+    "/usr/local/lib/lua/5.4/" .. extensionName .. "/" .. moduleName .. ".so",
+    "/usr/local/lib/lua/5.4/" .. moduleName .. ".so"
+  }
+
+local loaderName = "luaopen_" .. moduleName
+for _, path in ipairs(candidatePaths) do
+	local loader, loadErr = package.loadlib(path, loaderName)
+	if loader then
+		local ok, result = pcall(loader)
+		if ok then
+			mod = result
+			package.loaded[moduleName] = mod
+			print("Loaded testmodule via package.loadlib from " .. path)
+			break
+		else
+			print("Error invoking loader from " .. path .. ":", result)
+		end
+	elseif loadErr then
+		print("package.loadlib failed on " .. path .. ":", loadErr)
+	end
+end
+
+-- Alternative require + cpath update strategy
+
 local newEntries = {
   extensionRoot .. "/?.so",
   extensionRoot .. "/?/init.so"
@@ -45,35 +76,14 @@ for _, entry in ipairs(newEntries) do
 end
 package.cpath = updatedCpath
 
-local moduleName = "testmodule"
-local mod = nil
+local requireOk, requireResult = pcall(require, moduleName)
 
-local candidatePaths = {
-extensionRoot .. "/" .. moduleName .. ".so",
-extensionRoot .. "/lib/" .. moduleName .. ".so",
-extensionRoot .. "/bin/" .. moduleName .. ".so",
-"/usr/local/lib/lua/5.4/" .. extensionName .. "/" .. moduleName .. ".so",
-"/usr/local/lib/lua/5.4/" .. moduleName .. ".so"
-}
-
-local loaderName = "luaopen_" .. moduleName
-for _, path in ipairs(candidatePaths) do
-    local loader, loadErr = package.loadlib(path, loaderName)
-    if loader then
-        local ok, result = pcall(loader)
-        if ok then
-        mod = result
-        package.loaded[moduleName] = mod
-        print("Loaded testmodule via package.loadlib from " .. path)
-        break
-        else
-        print("Error invoking loader from " .. path .. ":", result)
-        end
-    elseif loadErr then
-        print("package.loadlib failed on " .. path .. ":", loadErr)
-    end
+if requireOk then
+  mod = requireResult
+  print("Loaded testmodule via require()")
+else
+  print("require('" .. moduleName .. "') failed:", requireResult)
 end
-
 
 if mod then
   if mod.hello then
