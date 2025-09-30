@@ -61,8 +61,8 @@ Hello from C++ side!
 
 1. Install the packaged extension (`Binary-test.aseprite-extension`).
 2. Launch Aseprite and enable the extension.
-3. Open the console (`Ctrl+Shift+`).
-4. Run the script: it prints the greeting plus a `true` value, proving the `.so` was linked and executed inside Aseprite on Linux.
+3. It prints the greeting plus a `true` value, proving the `.so` was linked and executed inside Aseprite on Linux.
+4. Disable & Enable the extension in the extensions menu (ctrl+k -> Extensions) to see the output again (re-runs the extension)
 
 Enjoy your binary-powered Aseprite workflow! 🎉
 
@@ -78,50 +78,3 @@ Enjoy your binary-powered Aseprite workflow! 🎉
 ## Troubleshooting
 
 - If you get "lua.h: No such file or directory", install Lua dev headers and point the include path as shown above.
-- If pkg-config fails on Windows, use explicit include (-I) and lib (-L) paths or MSVC project settings.
-- Verify the exported symbol exists in the DLL:
-  - On Windows, use dumpbin /EXPORTS testmodule.dll (MSVC tools) or objdump -x testmodule.dll (mingw) to confirm luaopen_testmodule is exported.
-- If luaopen symbol is not exported, ensure the code uses an export (see DLLEXPORT macro in testprogram.cpp).
-
-## Copying files with cp
-
-Simple copy:
-```bash
-cp source_file destination_file
-# Example:
-cp testmodule.so /path/to/aseprite/scripts/testmodule.so
-```
-
-Copy into a directory (keep same filename):
-```bash
-cp testmodule.so /path/to/aseprite/scripts/
-```
-
-Recursive copy (directories):
-```bash
-cp -r my_folder /path/to/destination/
-```
-
-Preserve attributes (mode, ownership, timestamps):
-```bash
-cp -a source_dir/ /path/to/destination/
-```
-
-Force copy and prompt before overwrite:
-```bash
-cp -i source_file destination_file  # prompt
-cp -f source_file destination_file  # force
-```
-
-Copy with sudo if writing to protected locations:
-```bash
-sudo cp testmodule.so /usr/local/share/aseprite/scripts/
-```
-
-Notes:
-- On Windows, use File Explorer or PowerShell's Copy-Item instead of cp.
-- Ensure the destination path exists; create it with mkdir -p if needed:
-```bash
-mkdir -p /path/to/aseprite/scripts
-cp testmodule.so /path/to/aseprite/scripts/
-```
